@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.8" type="plugin" group="system" method="upgrade">
+	<name>PLG_JT_TITLESTRIPE_XML_NAME</name>
+	<author>Guido De Gobbis</author>
+	<creationDate>##DATE##</creationDate>
+	<authorEmail>support@joomtools.de</authorEmail>
+	<authorUrl>http://joomtools.de</authorUrl>
+	<copyright>Copyright (C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
+	<license>GNU General Public License version 3 or later</license>
+	<version>##VERSION##</version>
+	<description>PLG_JT_TITLESTRIPE_XML_DESCRIPTION</description>
+
+	<files>
+		##FILES##
+	</files>
+
+	<languages folder="language">
+		##LANGUAGE_FILES##
+	</languages>
+
+	<config>
+		<fields name="params">
+			<fieldset name="basic">
+
+				<field name="breakstripe"
+				       type="text"
+				       label="PLG_JT_TITLESTRIPE_XML_BREAKSTRIPE_LABEL"
+				       default="|n|"
+				       description="PLG_JT_TITLESTRIPE_XML_BREAKSTRIPE_DESCRIPTION"/>
+
+				<field name="stripe"
+				       type="text"
+				       label="PLG_JT_TITLESTRIPE_XML_STRIPE_LABEL"
+				       default="||"
+				       description="PLG_JT_TITLESTRIPE_XML_STRIPE_DESCRIPTION"/>
+
+				<field name="tags"
+				       type="text"
+				       label="PLG_JT_TITLESTRIPE_XML_TAGS_LABEL"
+				       default=""
+				       description="PLG_JT_TITLESTRIPE_XML_TAGS_DESCRIPTION"/>
+
+				<field name="css"
+				       type="radio"
+				       class="btn-group"
+				       label="PLG_JT_TITLESTRIPE_XML_CSS_LABEL"
+				       default="1"
+				       description="PLG_JT_TITLESTRIPE_XML_CSS_DESCRIPTION">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+				<field name="inModule"
+				       type="radio"
+				       class="btn-group"
+				       default="0"
+				       label="PLG_JT_TITLESTRIPE_XML_INMODULE_LABEL"
+				       description="PLG_JT_TITLESTRIPE_XML_INMODULE_DESCRIPTION">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+			</fieldset>
+		</fields>
+	</config>
+
+</extension>

@@ -1,11 +1,11 @@
 <?php
 /**
- * @package      Joomla.Plugin
- * @subpackage   System.Jttitlestripe
+ * @package          Joomla.Plugin
+ * @subpackage       System.Jttitlestripe
  *
- * @author       Guido De Gobbis <support@joomtools.de>
+ * @author           Guido De Gobbis <support@joomtools.de>
  * @copyright    (c) 2017 JoomTools.de - All rights reserved.
- * @license      GNU General Public License version 3 or later
+ * @license          GNU General Public License version 3 or later
  **/
 
 // no direct access
@@ -19,6 +19,7 @@ class plgSystemJttitlestripe extends JPlugin
 	protected $tags = array('h1', 'h2', 'h3', 'h4', 'h5', 'h6');
 	protected $setCss = null;
 	protected $css = null;
+	protected $app = null;
 
 	public function __construct($subject, $params)
 	{
@@ -29,7 +30,7 @@ class plgSystemJttitlestripe extends JPlugin
 
 	public function onAfterInitialise()
 	{
-		if (JFactory::getApplication()->isAdmin()) return;
+		if ($this->app->isAdmin()) return;
 
 		$stripe      = explode(',', $this->params->get('stripe'));
 		$breakStripe = explode(',', $this->params->get('breakstripe'));
@@ -60,7 +61,7 @@ class plgSystemJttitlestripe extends JPlugin
 
 	public function onRenderModule(&$module, $attribs)
 	{
-		if (JFactory::getApplication()->isAdmin()) return;
+		if ($this->app->isAdmin()) return;
 
 		if ($this->params->get('inModule', 0) == 0 && $module->module != 'mod_breadcrumbs') return;
 
@@ -86,16 +87,16 @@ class plgSystemJttitlestripe extends JPlugin
 	protected function _checkStripe($string)
 	{
 		$stripe      = $this->stripe;
-		$breakstripe = $this->breakStripe;
+		$breakStripe = $this->breakStripe;
 
 		foreach ($stripe as $_stripe)
 		{
 			if (strpos($string, $_stripe)) return true;
 		}
 
-		foreach ($breakstripe as $_breakstripe)
+		foreach ($breakStripe as $_breakStripe)
 		{
-			if (strpos($string, $_breakstripe)) return true;
+			if (strpos($string, $_breakStripe)) return true;
 		}
 
 		return false;
@@ -120,33 +121,33 @@ class plgSystemJttitlestripe extends JPlugin
 
 		if (strpos($title, '||'))
 		{
-			list($maintitle, $_subtitle) = explode('||', $title, 2);
-			$subtitle = ($_subtitle != '' && $_subtitle != '|&n|') ? explode('||', $_subtitle) : false;
+			list($mainTitle, $_subTitle) = explode('||', $title, 2);
+			$subTitle = ($_subTitle != '' && $_subTitle != '|&n|') ? explode('||', $_subTitle) : false;
 		}
 		else
 		{
-			$maintitle = $title;
-			$subtitle  = false;
+			$mainTitle = $title;
+			$subTitle  = false;
 			$sub       = '';
 		}
 
 		$counter    = 1;
 		$break      = '';
-		$returnSubt = '';
+		$returnSubTitle = '';
 
-		if ($subtitle) :
-			foreach ($subtitle as $_title) :
+		if ($subTitle) :
+			foreach ($subTitle as $_title) :
 				if (strpos($_title, '|&n|') !== false) :
 					$break  = ' break';
 					$_title = substr($_title, 4);
 				else :
-					$returnSubt = '';
+					$returnSubTitle = '';
 				endif;
-				$returnSubt .= '<span class="subtitle sub-' . $counter++ . $break . '">' . $_title . '</span>';
+				$returnSubTitle .= '<span class="subtitle sub-' . $counter++ . $break . '">' . $_title . '</span>';
 			endforeach;
 		endif;
-		$returnMailt = '<span class="maintitle' . $sub . '">' . $maintitle . '</span>';
-		$return      = '<span class="jttitlestripe">' . $returnMailt . $returnSubt . '</span>';
+		$returnMainTitle = '<span class="maintitle' . $sub . '">' . $mainTitle . '</span>';
+		$return      = '<span class="jttitlestripe">' . $returnMainTitle . $returnSubTitle . '</span>';
 
 		return $return;
 	}
@@ -162,13 +163,13 @@ class plgSystemJttitlestripe extends JPlugin
 
 		$xmlString = $xml->saveXML($xml->getElementsByTagName('container')->item(0));
 
-		$findeStripes = simplexml_load_string($xmlString, 'SimpleXMLElement');
+		$findStripes = simplexml_load_string($xmlString, 'SimpleXMLElement');
 
-		$this->_findeStripes($findeStripes, false, $clear);
+		$this->_findStripes($findStripes, false, $clear);
 
 		$_article = new DOMDocument();
 		libxml_use_internal_errors(true);
-		$_article->loadXML($findeStripes->saveXML());
+		$_article->loadXML($findStripes->saveXML());
 		libxml_clear_errors();
 
 		$newArticle = $_article->saveHTML();
@@ -180,7 +181,7 @@ class plgSystemJttitlestripe extends JPlugin
 		return $article;
 	}
 
-	protected function _findeStripes($xml, $inTag = false, $clear = false)
+	protected function _findStripes($xml, $inTag = false, $clear = false)
 	{
 		if (!$xml instanceof SimpleXMLElement)
 		{
@@ -214,7 +215,7 @@ class plgSystemJttitlestripe extends JPlugin
 
 					if ($children >= 1)
 					{
-						$this->_findeStripes($node->children(), true, $clear);
+						$this->_findStripes($node->children(), true, $clear);
 					}
 				}
 				else
@@ -227,7 +228,7 @@ class plgSystemJttitlestripe extends JPlugin
 
 				if ($children >= 1)
 				{
-					$this->_findeStripes($node->children(), $inTag, $clear);
+					$this->_findStripes($node->children(), $inTag, $clear);
 				}
 			}
 		}
@@ -236,9 +237,9 @@ class plgSystemJttitlestripe extends JPlugin
 	protected function clearMultilineTitle($title)
 	{
 		$stripe      = $this->stripe;
-		$breakstripe = $this->breakStripe;
+		$breakStripe = $this->breakStripe;
 
-		foreach ($breakstripe as $value)
+		foreach ($breakStripe as $value)
 		{
 			$title = str_replace($value, ' ', $title);
 		}
@@ -251,20 +252,20 @@ class plgSystemJttitlestripe extends JPlugin
 
 		if (strpos($title, '||'))
 		{
-			list($maintitle, $_subtitle) = explode('||', $title, 2);
-			$subtitle = ($_subtitle != '' && $_subtitle != '\n') ? explode('||', $_subtitle) : false;
+			list($mainTitle, $_subTitle) = explode('||', $title, 2);
+			$subTitle = ($_subTitle != '' && $_subTitle != '\n') ? explode('||', $_subTitle) : false;
 		}
 		else
 		{
-			$maintitle = $title;
-			$subtitle  = false;
+			$mainTitle = $title;
+			$subTitle  = false;
 		}
 
 		$return = '';
-		$return .= $maintitle;
+		$return .= $mainTitle;
 
-		if ($subtitle) :
-			foreach ($subtitle as $_title) :
+		if ($subTitle) :
+			foreach ($subTitle as $_title) :
 				if (strpos($_title, '\n') !== false) :
 					$return .= ' ';
 					$_title = substr($_title, 2);
@@ -288,19 +289,10 @@ class plgSystemJttitlestripe extends JPlugin
 
 		$document->setTitle($title);
 
-		if (JFactory::getApplication()->isAdmin()) return;
+		if ($this->app->isAdmin()) return;
 
-		if (version_compare(JVERSION, '3.0', 'ge'))
-		{
-			$template = $document->getTemplateBuffer();
-		}
-		else
-		{
-			$template = $document->get('_template');
-		}
-
-		$component = $document->getBuffer('component');
-
+		$template        = $document->getTemplateBuffer();
+		$component       = $document->getBuffer('component');
 		$findInComponent = $this->_checkStripe($component);
 
 		if ($findInComponent)
@@ -321,14 +313,7 @@ class plgSystemJttitlestripe extends JPlugin
 			$_template_buffer = $_template[0][1] . $_template_buffer . $_template[0][3];
 			$template         = preg_replace('#(<\s*body[^>]*>)(.*?)(<\s*/\s*body>)#siU', $_template_buffer, $template);
 
-			if (version_compare(JVERSION, '3.0', 'ge'))
-			{
-				$document->setTemplateBuffer($template);
-			}
-			else
-			{
-				$document->set('_template', $template);
-			}
+			$document->setTemplateBuffer($template);
 		}
 
 		if ($findInComponent || $findInTemplate || ($this->setCss && $this->css))
@@ -338,4 +323,3 @@ class plgSystemJttitlestripe extends JPlugin
 		}
 	}
 }
-

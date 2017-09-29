@@ -22,7 +22,7 @@
 		<fields name="params">
 			<fieldset name="basic">
 
-				<field name="breakstripe"
+				<field name="breakStripe"
 				       type="text"
 				       label="PLG_JT_TITLESTRIPE_XML_BREAKSTRIPE_LABEL"
 				       default="|n|"

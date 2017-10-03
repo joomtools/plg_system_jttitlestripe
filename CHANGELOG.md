@@ -2,6 +2,18 @@
 
 #### 3.0.0-rc2
 
+* Merge pull request #2 from JoomTools/dev *2017-10-03*
+* Refactoring and add Updateserver *2017-10-03*
+* Prepare for release version 3.0.0-rc2 *2017-10-03*
+* WIP Refactoring *2017-10-03*
+* WIP Refactoring *2017-10-03*
+* WIP Refactoring *2017-10-03*
+* Prepare for release version 3.0.0-rc1 *2017-10-03*
+* Merge pull request #1 from JoomTools/dev *2017-10-03*
+* Refactoring for Joomla 3.8.0 *2017-10-03*
+* Merge branch 'dev' *2017-10-03*
+* Init *2017-10-03*
+* Initial commit *2017-10-03*
 * Prepare for release version 3.0.0-rc1 *2017-10-03*
 * Merge pull request #1 from JoomTools/dev *2017-10-03*
 * Refactoring for Joomla 3.8.0 *2017-10-03*

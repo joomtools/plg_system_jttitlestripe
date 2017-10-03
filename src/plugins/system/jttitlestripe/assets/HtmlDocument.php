@@ -238,7 +238,7 @@ class HtmlDocument extends Document
 	{
 		if (empty($data) || !is_array($data))
 		{
-			return;
+			return null;
 		}
 
 		$this->title        = (isset($data['title']) && !empty($data['title'])) ? $data['title'] : $this->title;
@@ -276,7 +276,7 @@ class HtmlDocument extends Document
 	{
 		if (empty($data) || !is_array($data))
 		{
-			return;
+			return null;
 		}
 
 		$this->title = (isset($data['title']) && !empty($data['title']) && !stristr($this->title, $data['title']))

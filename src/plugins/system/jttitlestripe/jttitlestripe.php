@@ -56,6 +56,7 @@ class PlgSystemJttitlestripe extends JPlugin
 	 * @since version
 	 */
 	protected $css = null;
+	protected $app = null;
 
 	/**
 	 * @var null
@@ -273,13 +274,6 @@ class PlgSystemJttitlestripe extends JPlugin
 		return $article;
 	}
 
-	/**
-	 * @param      $xml
-	 * @param bool $inTag
-	 * @param bool $clear
-	 *
-	 * @since version
-	 */
 	protected function _findStripes($xml, $inTag = false, $clear = false)
 	{
 		if (!$xml instanceof SimpleXMLElement)

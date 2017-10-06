@@ -56,7 +56,6 @@ class PlgSystemJttitlestripe extends JPlugin
 	 * @since version
 	 */
 	protected $css = null;
-	protected $app = null;
 
 	/**
 	 * @var null

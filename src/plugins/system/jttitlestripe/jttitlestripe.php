@@ -1,104 +1,104 @@
 <?php
 /**
- * @package          Joomla.Plugin
- * @subpackage       System.Jttitlestripe
+ * @package      Joomla.Plugin
+ * @subpackage   System.Jttitlestripe
  *
- * @author           Guido De Gobbis <support@joomtools.de>
- * @copyright    (c) 2017 JoomTools.de - All rights reserved.
- * @license          GNU General Public License version 3 or later
+ * @author       Guido De Gobbis <support@joomtools.de>
+ * @copyright    2020 JoomTools.de - All rights reserved.
+ * @license      GNU General Public License version 3 or later
  **/
 
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Application\CMSApplication;
+use Joomla\CMS\Factory;
+use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Profiler\Profiler;
+
 /**
  * @package      Joomla.Plugin
  * @subpackage   System.Jttitlestripe
  *
- * @since   3.8
+ * @since        3.0.0
  */
-class PlgSystemJttitlestripe extends JPlugin
+class PlgSystemJttitlestripe extends CMSPlugin
 {
 	/**
-	 * A Registry object holding the parameters for the plugin
-	 *
-	 * @var    Registry
-	 * @since  1.5
+	 * @var     boolean
+	 * @since   3.0.0
 	 */
-	public $params = null;
+	protected $debug = false;
 
 	/**
-	 * @var array
-	 * @since version
+	 * @var     array
+	 * @since   3.0.0
 	 */
 	protected $stripe = array();
 
 	/**
-	 * @var array
-	 * @since version
+	 * @var     array
+	 * @since   3.0.0
 	 */
 	protected $breakStripe = array();
 
 	/**
-	 * @var array
-	 * @since version
+	 * @var     array
+	 * @since   3.0.0
 	 */
 	protected $tags = array('h1', 'h2', 'h3', 'h4', 'h5', 'h6');
 
 	/**
-	 * @var null
-	 * @since version
+	 * @var     null
+	 * @since   3.0.0
 	 */
 	protected $setCss = null;
 
 	/**
-	 * @var null
-	 * @since version
+	 * @var     null
+	 * @since   3.0.0
 	 */
 	protected $css = null;
 
 	/**
-	 * @var null
-	 * @since version
+	 * @var     CMSApplication
+	 * @since   3.0.0
 	 */
 	protected $app = null;
 
 	/**
-	 * The name of the plugin
-	 *
-	 * @var    string
-	 * @since  1.5
-	 */
-	protected $_name = null;
-
-	/**
-	 * The plugin type
-	 *
-	 * @var    string
-	 * @since  1.5
-	 */
-	protected $_type = null;
-
-	/**
 	 * Affects constructor behavior. If true, language files will be loaded automatically.
 	 *
-	 * @var    boolean
-	 * @since  3.1
+	 * @var     boolean
+	 * @since   3.0.0
 	 */
 	protected $autoloadLanguage = true;
 
+	/**
+	 * After Initialise Event.
+	 * Defines basic variables on initalise system.
+	 *
+	 * @return   void
+	 *
+	 * @since    3.0.0
+	 */
 	public function onAfterInitialise()
 	{
-		if ($this->app->isAdmin())
+		$debug  = empty($this->params->get('debug', 0));
+
+		if (Factory::getConfig()->get('debug', false))
 		{
-			return;
+			$debug = true;
 		}
+
+		$this->debug = $debug;
 
 		JLoader::register('JDocumentHTML', JPATH_PLUGINS . '/system/jttitlestripe/assets/HtmlDocument.php');
 
-		$stripe      = explode(',', $this->params->get('stripe'));
-		$breakStripe = explode(',', $this->params->get('breakStripe'));
-		$tags        = explode(',', $this->params->get('tags'));
+		$stripe      = explode(',', $this->params->get('stripe', '||'));
+		$breakStripe = explode(',', $this->params->get('breakStripe', '|n|'));
+		$tags        = explode(',', $this->params->get('tags', ''));
 
 		foreach ($stripe as $value)
 		{
@@ -115,7 +115,7 @@ class PlgSystemJttitlestripe extends JPlugin
 			$this->tags[] = strtolower(trim($value));
 		}
 
-		$this->setCss = $this->params->get('css');
+		$this->setCss = !empty($this->params->get('css', 1));
 
 		if ($this->setCss)
 		{
@@ -125,7 +125,7 @@ class PlgSystemJttitlestripe extends JPlugin
 
 	public function onRenderModule(&$module, $attribs)
 	{
-		if ($this->app->isAdmin())
+		if ($this->app->isClient('administrator'))
 		{
 			return;
 		}
@@ -135,7 +135,17 @@ class PlgSystemJttitlestripe extends JPlugin
 			return;
 		}
 
-		$moduleTitle   = str_replace('&nbsp;', ' ', $module->title);
+		$moduleTitle = str_replace('&nbsp;', ' ', $module->title);
+
+		if ($this->debug)
+		{
+			// Set starttime for process total time
+			$startTime = microtime(1);
+
+			Profiler::getInstance('JT - Titlestripe (onRenderModule -> ' . $moduleTitle . ')')
+				->setStart($startTime);
+		}
+
 		$moduleContent = str_replace('&nbsp;', ' ', $module->content);
 		$clear         = ($module->module == 'mod_breadcrumbs') ? true : false;
 
@@ -151,6 +161,15 @@ class PlgSystemJttitlestripe extends JPlugin
 			{
 				$this->css = 'plugins/' . $this->_type . '/' . $this->_name . '/assets/stripe.css';
 			}
+		}
+
+		if ($this->debug)
+		{
+			$this->app->enqueueMessage(
+				Profiler::getInstance('JT - Titlestripe (onRenderModule -> ' . $moduleTitle . ')')
+					->mark('Verarbeitungszeit'),
+				'info'
+			);
 		}
 	}
 
@@ -182,7 +201,8 @@ class PlgSystemJttitlestripe extends JPlugin
 	{
 		$stripe      = $this->stripe;
 		$breakStripe = $this->breakStripe;
-		$sub         = ' sub';
+		$subTitle    = false;
+		$sub         = '';
 
 		foreach ($breakStripe as $value)
 		{
@@ -195,16 +215,14 @@ class PlgSystemJttitlestripe extends JPlugin
 			$title = str_replace(' ' . $value, '&nbsp;||', $title);
 		}
 
+		$mainTitle = $title;
+
 		if (strpos($title, '||'))
 		{
 			list($mainTitle, $_subTitle) = explode('||', $title, 2);
+
 			$subTitle = ($_subTitle != '' && $_subTitle != '|&n|') ? explode('||', $_subTitle) : false;
-		}
-		else
-		{
-			$mainTitle = $title;
-			$subTitle  = false;
-			$sub       = '';
+			$sub      = ' sub';
 		}
 
 		$counter        = 1;
@@ -230,18 +248,17 @@ class PlgSystemJttitlestripe extends JPlugin
 		}
 
 		$returnMainTitle = '<span class="maintitle' . $sub . '">' . $mainTitle . '</span>';
-		$return          = '<span class="jttitlestripe">' . $returnMainTitle . $returnSubTitle . '</span>';
 
-		return $return;
+		return '<span class="jttitlestripe">' . $returnMainTitle . $returnSubTitle . '</span>';
 	}
 
 	/**
-	 * @param      $article
-	 * @param bool $clear
+	 * @param   string  $article
+	 * @param   bool    $clear
 	 *
-	 * @return string
+	 * @return   string
 	 *
-	 * @since version
+	 * @since   3.0.0
 	 */
 	protected function _renderXML(&$article, $clear = false)
 	{
@@ -279,67 +296,66 @@ class PlgSystemJttitlestripe extends JPlugin
 		{
 			return;
 		}
-		else
+
+		foreach ($xml as $node)
 		{
-			foreach ($xml as $node)
+			$nodeName = strtolower($node->getName());
+
+			$children   = count($node->children());
+			$attributes = $node->attributes();
+
+			foreach ($attributes as $attrKey => $attrValue)
 			{
-				$nodeName = strtolower($node->getName());
-
-				$children   = count($node->children());
-				$attributes = $node->attributes();
-
-				foreach ($attributes as $attrKey => $attrValue)
+				if ($attrKey == 'value' || $nodeName == 'textarea')
 				{
-					if ($attrKey == 'value' || $nodeName == 'textarea')
-					{
-						continue;
-					}
-
-					if ($this->_checkStripe((string) $attrValue))
-					{
-						$attributes[$attrKey] = $this->clearMultilineTitle((string) $attrValue);
-					}
+					continue;
 				}
 
-				if (in_array($nodeName, $this->tags) || $inTag && !$clear)
+				if ($this->_checkStripe((string) $attrValue))
 				{
-					if ($this->_checkStripe((string) $node[0]))
-					{
-						$node[0] = $this->setMultilineTitle(trim((string) $node[0]));
-					}
-
-					if ($children >= 1)
-					{
-						$this->_findStripes($node->children(), true, $clear);
-					}
+					$attributes[$attrKey] = $this->clearMultilineTitle((string) $attrValue);
 				}
-				else
+			}
+
+			if (in_array($nodeName, $this->tags) || $inTag && !$clear)
+			{
+				if ($this->_checkStripe((string) $node[0]))
 				{
-					if ($this->_checkStripe((string) $node[0]))
-					{
-						$node[0] = $this->clearMultilineTitle(trim((string) $node[0]));
-					}
+					$node[0] = $this->setMultilineTitle(trim((string) $node[0]));
 				}
 
 				if ($children >= 1)
 				{
-					$this->_findStripes($node->children(), $inTag, $clear);
+					$this->_findStripes($node->children(), true, $clear);
 				}
+			}
+			else
+			{
+				if ($this->_checkStripe((string) $node[0]))
+				{
+					$node[0] = $this->clearMultilineTitle(trim((string) $node[0]));
+				}
+			}
+
+			if ($children >= 1)
+			{
+				$this->_findStripes($node->children(), $inTag, $clear);
 			}
 		}
 	}
 
 	/**
-	 * @param $title
+	 * @param   string  $title
 	 *
-	 * @return string
+	 * @return   string
 	 *
-	 * @since version
+	 * @since   3.0.0
 	 */
 	protected function clearMultilineTitle($title)
 	{
 		$stripe      = $this->stripe;
 		$breakStripe = $this->breakStripe;
+		$subTitle  = false;
 
 		foreach ($breakStripe as $value)
 		{
@@ -352,15 +368,12 @@ class PlgSystemJttitlestripe extends JPlugin
 			$title = str_replace(' ' . $value, ' ', $title);
 		}
 
+		$mainTitle = $title;
+
 		if (strpos($title, '||'))
 		{
 			list($mainTitle, $_subTitle) = explode('||', $title, 2);
 			$subTitle = ($_subTitle != '' && $_subTitle != '\n') ? explode('||', $_subTitle) : false;
-		}
-		else
-		{
-			$mainTitle = $title;
-			$subTitle  = false;
 		}
 
 		$return = '';
@@ -391,16 +404,23 @@ class PlgSystemJttitlestripe extends JPlugin
 		if ($this->_checkStripe($title))
 		{
 			$title = $this->clearMultilineTitle($title);
+
+			$document->setTitle($title);
 		}
 
-		$document->setTitle($title);
-
-		if ($this->app->isAdmin())
+		if ($this->app->isClient('administrator'))
 		{
 			return;
 		}
 
-		$template        = $document->getTemplateBuffer();
+		if ($this->debug)
+		{
+			// Set starttime for process total time
+			$startTime = microtime(1);
+
+			Profiler::getInstance('JT - Titlestripe (onBeforeCompileHead -> Content)')->setStart($startTime);
+		}
+
 		$component       = $document->getBuffer('component');
 		$findInComponent = $this->_checkStripe($component);
 
@@ -410,6 +430,23 @@ class PlgSystemJttitlestripe extends JPlugin
 			$document->setBuffer($component, 'component');
 		}
 
+		if ($this->debug)
+		{
+			$this->app->enqueueMessage(
+				Profiler::getInstance('JT - Titlestripe (onBeforeCompileHead -> Content)')->mark('Verarbeitungszeit'),
+				'info'
+			);
+		}
+
+		if ($this->debug)
+		{
+			// Set starttime for process total time
+			$startTime = microtime(1);
+
+			Profiler::getInstance('JT - Titlestripe (onBeforeCompileHead -> Template)')->setStart($startTime);
+		}
+
+		$template       = $document->getTemplateBuffer();
 		$findInTemplate = $this->_checkStripe($template);
 
 		if ($findInTemplate)
@@ -425,10 +462,17 @@ class PlgSystemJttitlestripe extends JPlugin
 			$document->setTemplateBuffer($template);
 		}
 
+		if ($this->debug)
+		{
+			$this->app->enqueueMessage(
+				Profiler::getInstance('JT - Titlestripe (onBeforeCompileHead -> Template)')->mark('Verarbeitungszeit'),
+				'info'
+			);
+		}
+
 		if ($findInComponent || $findInTemplate || ($this->setCss && $this->css))
 		{
-			$base = str_replace('/administrator', '', JURI::base(true));
-			$document->addStylesheet($base . '/' . $this->css);
+			HTMLHelper::_('stylesheet', $this->css, array('version' => 'auto'));
 		}
 	}
 }

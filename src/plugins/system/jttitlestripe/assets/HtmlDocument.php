@@ -4,7 +4,7 @@
  * @subpackage   System.Jttitlestripe
  *
  * @author       Guido De Gobbis <support@joomtools.de>
- * @copyright    (c) 2017 JoomTools.de - All rights reserved.
+ * @copyright    2020 JoomTools.de - All rights reserved.
  * @license      GNU General Public License version 3 or later
  **/
 
@@ -23,7 +23,7 @@ jimport('joomla.utilities.utility');
 /**
  * HtmlDocument class, provides an easy interface to parse and display a HTML document
  *
- * @since  11.1
+ * @since  1.7.0
  */
 class HtmlDocument extends Document
 {
@@ -31,7 +31,7 @@ class HtmlDocument extends Document
 	 * Array of Header `<link>` tags
 	 *
 	 * @var    array
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	public $_links = array();
 
@@ -39,7 +39,7 @@ class HtmlDocument extends Document
 	 * Array of custom tags
 	 *
 	 * @var    array
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	public $_custom = array();
 
@@ -47,7 +47,7 @@ class HtmlDocument extends Document
 	 * Name of the template
 	 *
 	 * @var    string
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	public $template = null;
 
@@ -55,7 +55,7 @@ class HtmlDocument extends Document
 	 * Base url
 	 *
 	 * @var    string
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	public $baseurl = null;
 
@@ -63,7 +63,7 @@ class HtmlDocument extends Document
 	 * Array of template parameters
 	 *
 	 * @var    array
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	public $params = null;
 
@@ -71,7 +71,7 @@ class HtmlDocument extends Document
 	 * File name
 	 *
 	 * @var    array
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	public $_file = null;
 
@@ -79,7 +79,7 @@ class HtmlDocument extends Document
 	 * String holding parsed template
 	 *
 	 * @var    string
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	protected $_template = '';
 
@@ -87,7 +87,7 @@ class HtmlDocument extends Document
 	 * Array of parsed template JDoc tags
 	 *
 	 * @var    array
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	protected $_template_tags = array();
 
@@ -95,7 +95,7 @@ class HtmlDocument extends Document
 	 * Integer with caching setting
 	 *
 	 * @var    integer
-	 * @since  11.1
+	 * @since  1.7.0
 	 */
 	protected $_caching = null;
 
@@ -103,7 +103,7 @@ class HtmlDocument extends Document
 	 * Set to true when the document should be output as HTML5
 	 *
 	 * @var    boolean
-	 * @since  12.1
+	 * @since  3.0.0
 	 *
 	 * @note  4.0  Will be replaced by $html5 and the default value will be true.
 	 */
@@ -114,7 +114,7 @@ class HtmlDocument extends Document
 	 *
 	 * @param   array  $options  Associative array of options
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function __construct($options = array())
 	{
@@ -132,7 +132,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  array  The document head data in array form
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function getHeadData()
 	{
@@ -147,7 +147,11 @@ class HtmlDocument extends Document
 		$data['scripts']     = $this->_scripts;
 		$data['script']      = $this->_script;
 		$data['custom']      = $this->_custom;
-		$data['scriptText']  = \JText::script();
+
+		// This is for b.c. and can be safely removed in future
+		$data['scriptText']    = \JText::getScriptStrings();
+
+		$data['scriptOptions'] = $this->scriptOptions;
 
 		return $data;
 	}
@@ -175,6 +179,7 @@ class HtmlDocument extends Document
 			$this->_scripts     = array();
 			$this->_script      = array();
 			$this->_custom      = array();
+			$this->scriptOptions = array();
 		}
 
 		if (is_array($types))
@@ -222,6 +227,10 @@ class HtmlDocument extends Document
 				$realType = '_' . $type;
 				$this->{$realType} = array();
 				break;
+
+			case 'scriptOptions':
+				$this->{$type} = array();
+				break;
 		}
 	}
 
@@ -232,7 +241,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument|null instance of $this to allow chaining or null for empty input data
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function setHeadData($data)
 	{
@@ -251,14 +260,7 @@ class HtmlDocument extends Document
 		$this->_scripts     = (isset($data['scripts']) && !empty($data['scripts'])) ? $data['scripts'] : $this->_scripts;
 		$this->_script      = (isset($data['script']) && !empty($data['script'])) ? $data['script'] : $this->_script;
 		$this->_custom      = (isset($data['custom']) && !empty($data['custom'])) ? $data['custom'] : $this->_custom;
-
-		if (isset($data['scriptText']) && !empty($data['scriptText']))
-		{
-			foreach ($data['scriptText'] as $key => $string)
-			{
-				\JText::script($key, $string);
-			}
-		}
+		$this->scriptOptions = (isset($data['scriptOptions']) && !empty($data['scriptOptions'])) ? $data['scriptOptions'] : $this->scriptOptions;
 
 		return $this;
 	}
@@ -270,13 +272,13 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument|null instance of $this to allow chaining or null for empty input data
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function mergeHeadData($data)
 	{
 		if (empty($data) || !is_array($data))
 		{
-			return null;
+			return;
 		}
 
 		$this->title = (isset($data['title']) && !empty($data['title']) && !stristr($this->title, $data['title']))
@@ -311,7 +313,7 @@ class HtmlDocument extends Document
 		{
 			foreach ($data['style'] as $type => $stdata)
 			{
-				if (!isset($this->_style[strtolower($type)]) || !stristr($this->_style[strtolower($type)], $stdata))
+				if (!isset($this->_style[strtolower($type)]) || !stristr($stdata, $this->_style[strtolower($type)]))
 				{
 					$this->addStyleDeclaration($stdata, $type);
 				}
@@ -326,7 +328,7 @@ class HtmlDocument extends Document
 		{
 			foreach ($data['script'] as $type => $sdata)
 			{
-				if (!isset($this->_script[strtolower($type)]) || !stristr($this->_script[strtolower($type)], $sdata))
+				if (!isset($this->_script[strtolower($type)]) || !stristr($sdata, $this->_script[strtolower($type)]))
 				{
 					$this->addScriptDeclaration($sdata, $type);
 				}
@@ -336,6 +338,14 @@ class HtmlDocument extends Document
 		$this->_custom = (isset($data['custom']) && !empty($data['custom']) && is_array($data['custom']))
 			? array_unique(array_merge($this->_custom, $data['custom']))
 			: $this->_custom;
+
+		if (!empty($data['scriptOptions']))
+		{
+			foreach ($data['scriptOptions'] as $key => $scriptOptions)
+			{
+				$this->addScriptOptions($key, $scriptOptions, true);
+			}
+		}
 
 		return $this;
 	}
@@ -354,7 +364,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function addHeadLink($href, $relation, $relType = 'rel', $attribs = array())
 	{
@@ -378,7 +388,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function addFavicon($href, $type = 'image/vnd.microsoft.icon', $relation = 'shortcut icon')
 	{
@@ -395,7 +405,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function addCustomTag($html)
 	{
@@ -409,7 +419,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  boolean true when HTML5 is used
 	 *
-	 * @since   12.1
+	 * @since   3.0.0
 	 */
 	public function isHtml5()
 	{
@@ -423,7 +433,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  void
 	 *
-	 * @since   12.1
+	 * @since   3.0.0
 	 */
 	public function setHtml5($state)
 	{
@@ -442,7 +452,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  mixed|string The output of the renderer
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function getBuffer($type = null, $name = null, $attribs = array())
 	{
@@ -504,7 +514,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function setBuffer($content, $options = array())
 	{
@@ -530,7 +540,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function parse($params = array())
 	{
@@ -545,7 +555,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  string The rendered data
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function render($caching = false, $params = array())
 	{
@@ -557,7 +567,7 @@ class HtmlDocument extends Document
 		}
 
 		$data = $this->_renderTemplate();
-		parent::render();
+		parent::render($caching, $params);
 
 		return $data;
 	}
@@ -569,7 +579,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  integer  Number of modules found
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function countModules($condition)
 	{
@@ -606,7 +616,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  integer  Number of child menu items
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	public function countMenuChildren()
 	{
@@ -643,7 +653,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  string  The contents of the template
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	protected function _loadTemplate($directory, $filename)
 	{
@@ -686,7 +696,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	protected function _fetchTemplate($params = array())
 	{
@@ -729,7 +739,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return  HtmlDocument  instance of $this to allow chaining
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	protected function _parseTemplate()
 	{
@@ -757,6 +767,7 @@ class HtmlDocument extends Document
 					$template_tags_last[$matches[0][$i]] = array('type' => $type, 'name' => $name, 'attribs' => $attribs);
 				}
 			}
+
 			// Reverse the last array so the jdocs are in forward order.
 			$template_tags_last = array_reverse($template_tags_last);
 
@@ -771,7 +782,7 @@ class HtmlDocument extends Document
 	 *
 	 * @return string rendered template
 	 *
-	 * @since   11.1
+	 * @since   1.7.0
 	 */
 	protected function _renderTemplate()
 	{

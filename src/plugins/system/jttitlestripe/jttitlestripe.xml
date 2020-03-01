@@ -5,7 +5,7 @@
 	<creationDate>##DATE##</creationDate>
 	<authorEmail>support@joomtools.de</authorEmail>
 	<authorUrl>http://joomtools.de</authorUrl>
-	<copyright>Copyright (C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
+	<copyright>(C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
 	<license>GNU General Public License version 3 or later</license>
 	<version>##VERSION##</version>
 	<description>PLG_JT_TITLESTRIPE_XML_DESCRIPTION</description>
@@ -14,9 +14,7 @@
 		##FILES##
 	</files>
 
-	<languages folder="language">
-		##LANGUAGE_FILES##
-	</languages>
+	<scriptfile>script.php</scriptfile>
 
 	<config>
 		<fields name="params">
@@ -42,7 +40,7 @@
 
 				<field name="css"
 				       type="radio"
-				       class="btn-group"
+				       class="btn-group btn-group-yesno"
 				       label="PLG_JT_TITLESTRIPE_XML_CSS_LABEL"
 				       default="1"
 				       description="PLG_JT_TITLESTRIPE_XML_CSS_DESCRIPTION">
@@ -52,7 +50,7 @@
 
 				<field name="inModule"
 				       type="radio"
-				       class="btn-group"
+				       class="btn-group btn-group-yesno"
 				       default="0"
 				       label="PLG_JT_TITLESTRIPE_XML_INMODULE_LABEL"
 				       description="PLG_JT_TITLESTRIPE_XML_INMODULE_DESCRIPTION">
@@ -60,11 +58,20 @@
 					<option value="0">JNO</option>
 				</field>
 
+				<field name="debug"
+				       type="radio"
+				       class="btn-group btn-group-yesno"
+				       default="0"
+				       label="PLG_JT_TITLESTRIPE_XML_DEBUG_LABEL"
+				       description="PLG_JT_TITLESTRIPE_XML_DEBUG_DESCRIPTION">
+					<option value="1">JOFF</option>
+					<option value="0">JON</option>
+				</field>
 			</fieldset>
 		</fields>
 	</config>
 
 	<updateservers>
-		<server type="extension" priority="1" name="PLG_JT_TITLESTRIPE_XML_NAME">https://raw.githubusercontent.com/JoomTools/updateserver/master/plg_system_jttitlestripe.xml</server>
+		<server type="extension" priority="1" name="PLG_JT_TITLESTRIPE_XML_NAME">https://raw.githubusercontent.com/JoomTools/plg_system_jttitlestripe/master/update.xml</server>
 	</updateservers>
 </extension>

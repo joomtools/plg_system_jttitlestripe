@@ -11,6 +11,8 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Factory;
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Language\Text;
 
 /**
@@ -77,19 +79,51 @@ class PlgSystemJttitlestripeInstallerScript
 
 		if ($action === 'update')
 		{
-			return $this->removeOldUpdateserver();
+			$errorRemoveOldUpdateserver = $this->removeOldUpdateserver($installer->getName());
+
+			$pluginPath = [];
+			$pluginPath[] = JPATH_PLUGINS;
+			$pluginPath[] = $installer->get('group', '');
+			$pluginPath[] = $installer->getElement();
+			$pluginPath = implode($pluginPath);
+
+			$deletes = [];
+
+			$deletes['folder'] = array();
+
+			$deletes['file'] = array(
+				// Before 3.0.0-rc4
+				JPATH_ROOT . '/administrator/language/de-DE/de-DE.plg_system_jttitlestripe.ini',
+				JPATH_ROOT . '/administrator/language/de-DE/de-DE.plg_system_jttitlestripe.sys.ini',
+				JPATH_ROOT . '/administrator/language/en-GB/en-GB.plg_system_jttitlestripe.ini',
+				JPATH_ROOT . '/administrator/language/en-GB/en-GB.plg_system_jttitlestripe.ini',
+			);
+
+			$errorDeleteOrphans = false;
+
+			foreach ($deletes as $key => $orphans)
+			{
+				$errorDeleteOrphans = $this->deleteOrphans($key, $orphans);
+			}
+
+			if ($errorRemoveOldUpdateserver || $errorDeleteOrphans)
+			{
+				return false;
+			}
 		}
 	}
 
 	/**
 	 * Remove the old Updateserver
 	 *
-	 * @return   boolean  True on success
+	 * @param   string  $name  Installer name (pluginname)
+	 *
+	 * @return   boolean    False on success (false = no errors)
 	 * @throws   Exception
 	 *
 	 * @since   3.0.0
 	 */
-	protected function removeOldUpdateserver()
+	protected function removeOldUpdateserver($name)
 	{
 		$app = Factory::getApplication();
 		$db  = JFactory::getDbo();
@@ -101,13 +135,13 @@ class PlgSystemJttitlestripeInstallerScript
 				$db->getQuery(true)
 					->select('update_site_id')
 					->from($db->quoteName('#__update_sites'))
-					->where($db->quoteName('location') . ' = ' . $db->quote('PLG_JT_TITLESTRIPE_XML_NAME'))
+					->where($db->quoteName('name') . ' = ' . $db->quote($name))
 			)->loadResult();
 
 			// Skip delete when id doesn’t exists
 			if (!$id)
 			{
-				return true;
+				return false;
 			}
 
 			// Delete from update sites
@@ -128,7 +162,54 @@ class PlgSystemJttitlestripeInstallerScript
 		{
 			$app->enqueueMessage(JText::sprintf('JLIB_DATABASE_ERROR_FUNCTION_FAILED', $e->getCode(), $e->getMessage()) . '<br />');
 
-			return false;
+			return true;
 		}
+
+		return false;
+	}
+
+	/**
+	 * @param   string  $type     Wich type are orphans of (file or folder)
+	 * @param   array   $orphans  Array of files or folders to delete
+	 *
+	 * @return   boolean    False on success (false = no errors)
+	 * @throws   Exception
+	 *
+	 * @since   3.0.0
+	 */
+	private function deleteOrphans($type, array $orphans)
+	{
+		$app    = Factory::getApplication();
+		$return = false;
+
+		foreach ($orphans as $item)
+		{
+			if ($type == 'folder')
+			{
+				if (is_dir($item))
+				{
+					if (Folder::delete($item) === false)
+					{
+						$app->enqueueMessage(Text::sprintf('PLG_JT_TITLESTRIPE_NOT_DELETED', $item) . '<br />');
+
+						$return = true;
+					}
+				}
+			}
+			if ($type == 'file')
+			{
+				if (is_file($item))
+				{
+					if (File::delete($item) === false)
+					{
+						$app->enqueueMessage(Text::sprintf('PLG_JT_TITLESTRIPE_NOT_DELETED', $item) . '<br />');
+
+						$return = true;
+					}
+				}
+			}
+		}
+
+		return $return;
 	}
 }

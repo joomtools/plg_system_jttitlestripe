@@ -5,7 +5,7 @@
 	<creationDate>##DATE##</creationDate>
 	<authorEmail>support@joomtools.de</authorEmail>
 	<authorUrl>http://joomtools.de</authorUrl>
-	<copyright>Copyright (C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
+	<copyright>(C) ##YEAR## JoomTools.de. All rights reserved.</copyright>
 	<license>GNU General Public License version 3 or later</license>
 	<version>##VERSION##</version>
 	<description>PLG_JT_TITLESTRIPE_XML_DESCRIPTION</description>
@@ -13,6 +13,8 @@
 	<files>
 		##FILES##
 	</files>
+
+	<scriptfile>script.php</scriptfile>
 
 	<config>
 		<fields name="params">

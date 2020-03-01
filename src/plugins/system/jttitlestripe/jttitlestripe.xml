@@ -70,6 +70,6 @@
 	</config>
 
 	<updateservers>
-		<server type="extension" priority="1" name="PLG_JT_TITLESTRIPE_XML_NAME">https://raw.githubusercontent.com/JoomTools/updateserver/master/plg_system_jttitlestripe.xml</server>
+		<server type="extension" priority="1" name="PLG_JT_TITLESTRIPE_XML_NAME">https://raw.githubusercontent.com/JoomTools/plg_system_jttitlestripe/master/update.xml</server>
 	</updateservers>
 </extension>

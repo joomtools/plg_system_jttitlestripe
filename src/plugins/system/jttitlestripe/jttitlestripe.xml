@@ -38,7 +38,7 @@
 
 				<field name="css"
 				       type="radio"
-				       class="btn-group"
+				       class="btn-group btn-group-yesno"
 				       label="PLG_JT_TITLESTRIPE_XML_CSS_LABEL"
 				       default="1"
 				       description="PLG_JT_TITLESTRIPE_XML_CSS_DESCRIPTION">
@@ -48,7 +48,7 @@
 
 				<field name="inModule"
 				       type="radio"
-				       class="btn-group"
+				       class="btn-group btn-group-yesno"
 				       default="0"
 				       label="PLG_JT_TITLESTRIPE_XML_INMODULE_LABEL"
 				       description="PLG_JT_TITLESTRIPE_XML_INMODULE_DESCRIPTION">
@@ -56,6 +56,15 @@
 					<option value="0">JNO</option>
 				</field>
 
+				<field name="debug"
+				       type="radio"
+				       class="btn-group btn-group-yesno"
+				       default="0"
+				       label="PLG_JT_TITLESTRIPE_XML_DEBUG_LABEL"
+				       description="PLG_JT_TITLESTRIPE_XML_DEBUG_DESCRIPTION">
+					<option value="1">JOFF</option>
+					<option value="0">JON</option>
+				</field>
 			</fieldset>
 		</fields>
 	</config>

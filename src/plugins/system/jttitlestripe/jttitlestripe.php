@@ -11,6 +11,8 @@
 // no direct access
 defined('_JEXEC') or die('Restricted access');
 
+JLoader::register('JDocumentHTML', dirname(__FILE__) . '/assets/HtmlDocument.php');
+
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
@@ -93,8 +95,6 @@ class PlgSystemJttitlestripe extends CMSPlugin
 		}
 
 		$this->debug = $debug;
-
-		JLoader::register('JDocumentHTML', JPATH_PLUGINS . '/system/jttitlestripe/assets/HtmlDocument.php');
 
 		$stripe      = explode(',', $this->params->get('stripe', '||'));
 		$breakStripe = explode(',', $this->params->get('breakStripe', '|n|'));
@@ -398,7 +398,7 @@ class PlgSystemJttitlestripe extends CMSPlugin
 
 	public function onBeforeCompileHead()
 	{
-		$document = JFactory::getDocument();
+		$document = Factory::getDocument();
 		$title    = $document->getTitle();
 
 		if ($this->_checkStripe($title))
